@@ -24,6 +24,7 @@
           '(width . 90)
           '(height . 60))
 
+;; Prevents some cases of Emacs flickering
 (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
 
 ;; Consts
@@ -100,6 +101,8 @@
   prettier-js-args '("--single-quote")
   kill-whole-line t
   treemacs-width 32
+  ;; opt for manual completion
+  company-idle-delay nil
   dired-dwim-target t
   org-ellipsis " ▾ "
   org-bullets-bullet-list '("·")
@@ -253,7 +256,10 @@
         ;;lsp-ui-doc-include-signature t
         lsp-ui-doc-position 'top
         lsp-ui-imenu-kind-position 'left
-        ;;lsp-ui-sideline-enable nil
+        ;; lsp-ui-sideline is redundant with eldoc and much more invasive, so
+        ;; disable it by default.
+        lsp-ui-sideline-enable nil
+        sp-enable-symbol-highlighting nil
         lsp-ui-sideline-code-actions-prefix "💡"
         company-lsp-cache-candidates nil
         ;; fix for completing candidates not showing after “Enum.”:
@@ -342,3 +348,9 @@
 
 (map! "C-x b"   #'counsel-buffer-or-recentf
       "C-x C-b" #'counsel-switch-buffer)
+
+;; :tools magit
+(setq magit-repository-directories '(("~/projects" . 2))
+      magit-save-repository-buffers nil
+      ;; Don't restore the wconf after quitting magit, it's jarring
+      magit-inhibit-save-previous-winconf t)
