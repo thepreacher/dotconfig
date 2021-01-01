@@ -2,7 +2,6 @@
 ;;; Author: Napleon Ahiable
 ;;; Commentary:
 ;; https://github.com/rememberYou/.emacs.d/blob/master/config.org#about
-;; https://github.com/raxod502/radian/blob/develop/emacs/radian.el
 
 ;; Targeted for Emacs 27+
 
@@ -40,8 +39,9 @@
 (require 'cl-lib)
 
 ;; Package sources
-(add-to-list 'package-archives '( "melpa" . "https://melpa.org/packages/") t)
-
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")))
 
 (package-initialize)
 (unless package-archive-contents
@@ -53,11 +53,11 @@
 
 (setq use-package-always-ensure t)
 
+
 (let ((package-check-signature nil))
-  (use-package gnu-elpa-keyring-update :demand))
+  (use-package gnu-elpa-keyring-update))
 
-(setq package-check-signature nil)
-
+(setq package-check-signature nil) ;; uncomment when having bad signature issues
 
 (use-package delight)
 (use-package use-package-ensure-system-package)
@@ -157,11 +157,10 @@
   user-full-name "Napoleon Ahiable"                ; Set the full name of the current user
   user-mail-address "219075+thepreacher@users.noreply.github.com" ; Set the email address of the current user
   vc-follow-symlinks t                             ; Always follow the symlinks
-  next-line-add-newlines t                         ; insert newlines if the point is at the end of the buffer
   view-read-only t                                 ; Always open read-only buffers in view-mode
   cursor-type 'bar                                 ; Default is 'box (options - 'bar ,'hollow)
-  column-number-mode 1)                             ; Show the column number
-
+  column-number-mode 1                             ; Show the column number
+  show-paren-mode 1)                               ; Show the parent
 
 
 
@@ -175,20 +174,6 @@
 ;; General Customizations
 
 (fset 'yes-or-no-p 'y-or-n-p)                     ; Replace yes/no prompts with y/n
-
-;; make typing delete/overwrites selected text
-(delete-selection-mode 1)
-(setq shift-select-mode nil)
-
-
-;; Flash cursor position
-(use-package beacon
-  :init
-  (setq-default beacon-lighter "")
-  (setq-default beacon-size 5)
-  :config
-  (beacon-mode))
-
 
 ;; Keybindings
 
@@ -219,32 +204,16 @@
 (use-package crux
   :bind(("C-k" . crux-smart-kill-line)
         ("M-o" . crux-smart-open-line)
+        ("C-M-o" . crux-smart-open-line-above)
+        ("C-c f" . crux-recentf-find-file)
         ("C-c n" . crux-cleanup-buffer-or-region)
         ("C-c e" . crux-eval-and-replace)
         ("C-c D" . crux-delete-file-and-buffer)
         ("C-c d" . crux-duplicate-current-line-or-region)
         ("C-c r" . crux-rename-file-and-buffer)
-        ("C-c f" . crux-recentf-find-file)
         ([remap kill-whole-line] . crux-kill-whole-line)
         ([remap move-beginning-of-line] . crux-move-beginning-of-line)
         ("C-<backspace>" . crux-kill-line-backwards)))
-
-
-(progn
-  ;; no need to warn
-  (put 'narrow-to-region 'disabled nil)
-  (put 'narrow-to-page 'disabled nil)
-  (put 'upcase-region 'disabled nil)
-  (put 'downcase-region 'disabled nil)
-  (put 'erase-buffer 'disabled nil)
-  (put 'scroll-left 'disabled nil)
-  (put 'dired-find-alternate-file 'disabled nil))
-
-;; Page break lines
-(use-package page-break-lines
-  :hook (after-init . global-page-break-lines-mode))
-
-
 
 
 ;;; Fonts and Themes
@@ -286,15 +255,10 @@
   :init (unless (find-font (font-spec :name "all-the-icons"))
           (all-the-icons-install-fonts t)))
 
-;; Parens
-(show-paren-mode +1)
-(setq show-paren-style 'parenthesis)
-
 ;; Faces
 (use-package faces
   :ensure nil
   :init
-  ;; don't delay show parens immediately
   (setq show-paren-delay 0)
   :config
   (set-face-background 'show-paren-match "#262b36")
@@ -310,11 +274,6 @@
 ;; visual-fill-column
 (use-package visual-fill-column
   :hook (visual-line-mode . visual-fill-column-mode))
-
-;; Huge files
-(when (fboundp 'so-long-enable)
-  (add-hook 'after-init-hook 'so-long-enable))
-
 
 ;; move-text
 ;; Moves the current line (or if marked, the current region’s, whole lines).
@@ -405,10 +364,6 @@
 
 (use-package highlight-escape-sequences
     :hook (prog-mode . hes-mode))
-
-;; temporarily highlight changes from yanking, etc
-(use-package volatile-highlights
-  :hook (prog-mode . volatile-highlights-mode))
 
 
 (cua-selection-mode t) ;; cua goodness without copy/paste etc.
@@ -544,6 +499,7 @@
              (";" . dired-subtree-remove)))
 
 
+
 ;; Tramp
 (use-package tramp
   :defer
@@ -638,6 +594,7 @@
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
     (treemacs-resize-icons 20)
+
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
     (treemacs-fringe-indicator-mode t)
@@ -670,34 +627,28 @@
   :after (treemacs lsp-mode))
 
 
-;; Feature `ibuffer' provides a more modern replacement for the
-;; `list-buffers' command.
-(use-package ibuffer
-  :ensure nil
-  :bind (([remap list-buffers] . #'ibuffer))
-  :config
-  ;; Modify the default ibuffer-formats (toggle with `)
-  (setq ibuffer-formats
-        '((mark modified read-only vc-status-mini " "
-                (name 22 22 :left :elide)
-                " "
-                (size-h 9 -1 :right)
-                " "
-                (mode 12 12 :left :elide)
-                " "
-                vc-relative-file)
-          (mark modified read-only vc-status-mini " "
-                (name 22 22 :left :elide)
-                " "
-                (size-h 9 -1 :right)
-                " "
-                (mode 14 14 :left :elide)
-                " "
-                (vc-status 12 12 :left)
-                " "
-                vc-relative-file)))
+;; Modify the default ibuffer-formats (toggle with `)
+(setq ibuffer-formats
+      '((mark modified read-only vc-status-mini " "
+              (name 22 22 :left :elide)
+              " "
+              (size-h 9 -1 :right)
+              " "
+              (mode 12 12 :left :elide)
+              " "
+              vc-relative-file)
+        (mark modified read-only vc-status-mini " "
+              (name 22 22 :left :elide)
+              " "
+              (size-h 9 -1 :right)
+              " "
+              (mode 14 14 :left :elide)
+              " "
+              (vc-status 12 12 :left)
+              " "
+              vc-relative-file)))
 
-  (setq ibuffer-filter-group-name-face 'font-lock-doc-face))
+(setq ibuffer-filter-group-name-face 'font-lock-doc-face)
 
 
 (use-package fullframe
@@ -743,12 +694,33 @@
 
 ;; Helpful - A better emacs help buffer
 (use-package helpful
-  :defer)
+  :defer
+  :init
+  (setq counsel-describe-function-function #'helpful-callable)
+  (setq counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-key] . helpful-key))
 
 ;; Projectile - Project discovery
 (use-package projectile
-  :hook (after-init . projectile-mode)
+  :defer
   :delight '(:eval (concat " " (projectile-project-name)))
+  :preface
+  (defun my/projectile-compilation-buffers (&optional project)
+    "Get a list of a project's compilation buffers.
+  If PROJECT is not specified the command acts on the current project."
+    (let* ((project-root (or project (projectile-project-root)))
+           (buffer-list (mapcar #'process-buffer compilation-in-progress))
+           (all-buffers (cl-remove-if-not
+                         (lambda (buffer)
+                           (projectile-project-buffer-p buffer project-root))
+                         buffer-list)))
+      (if projectile-buffers-filter-function
+          (funcall projectile-buffers-filter-function all-buffers)
+        all-buffers)))
   :init
   (when (executable-find "rg")
     (setq-default projectile-generic-command "rg --files --hidden"))
@@ -763,25 +735,16 @@
                                               "~/projects/learn/js/"
                                               "~/projects/probono/"
                                               "~/projects/paid/")))
-  :bind-keymap* (("C-c p" . projectile-command-map))
-  :config
-  ;; When switching projects, give the option to choose what to do.
-  ;; This is a way better interface than having to remember ahead of
-  ;; time to use a prefix argument on `projectile-switch-project'
-  ;; (because, and please be honest here, when was the last time you
-  ;; actually remembered to do that?).
-  (setq projectile-switch-project-action 'projectile-commander)
+  (setq projectile-switch-project-action #'projectile-dired
+        projectile-completion-system 'ivy
+        projectile-known-projects-file (expand-file-name "var/projectile-bookmarks.eld" user-emacs-directory))
+  :bind (:map projectile-mode-map
+          ("C-c p" . projectile-command-map)))
 
-  (def-projectile-commander-method ?\C-m
-    "Find file in project."
-    (call-interactively #'find-file))
-
-  ;; Use Selectrum (via `completing-read') for Projectile instead of
-  ;; IDO.
-  (setq projectile-completion-system 'default)
-  (setq projectile-known-projects-file (expand-file-name "var/projectile-bookmarks.eld" user-emacs-directory)))
-
-
+;; Counsel integration for projectile
+(use-package counsel-projectile
+  :after (counsel projectile)
+  :config (counsel-projectile-mode +1))
 
 ;; Ibuffer
 (use-package ibuffer-projectile
@@ -798,7 +761,7 @@
   :hook (after-init . recentf-mode)
   :init
   (setq recentf-auto-cleanup 'never
-        recentf-max-saved-items 50
+        recentf-max-saved-items 500
         recentf-max-menu-items 15
         recentf-save-file (concat user-emacs-directory "var/recentf")
         recentf-exclude (list "COMMIT_EDITMSG"
@@ -811,10 +774,146 @@
                               "/elpa/.*\\'"
                               "/tramp.*\\'"
                               "/sudo.*\\'"
-                              "/node_modules/.*\\'"))
-  :config
-  (global-set-key "\C-x\ \C-r" 'recentf-open-files))
-  ;; (global-set-key (kbd "C-x C-r") 'recentf-open-files))
+                              "/node_modules/.*\\'")))
+
+
+;; Hydra
+(use-package hydra
+  :bind (("C-c I" . hydra-image/body)
+         ;; ("C-c L" . hydra-ledger/body)
+         ("C-c M" . hydra-merge/body)
+         ("C-c T" . hydra-tool/body)
+         ("C-c b" . hydra-btoggle/body)
+         ("C-c c" . hydra-clock/body)
+         ;; ("C-c e" . hydra-erc/body)
+         ("C-c f" . hydra-flycheck/body)
+         ;; ("C-c g" . hydra-go-to-file/body)
+         ("C-c m" . hydra-magit/body)
+         ("C-c o" . hydra-org/body)
+         ("C-c p" . hydra-projectile/body)
+         ("C-c q" . hydra-query/body)
+         ("C-c s" . hydra-spelling/body)
+         ("C-c t" . hydra-tex/body)
+         ("C-c u" . hydra-upload/body)
+         ("C-c w" . hydra-windows/body)))
+
+(use-package major-mode-hydra
+  :after hydra
+  :preface
+  (defun with-alltheicon (icon str &optional height v-adjust)
+    "Displays an icon from all-the-icon."
+    (s-concat (all-the-icons-alltheicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str))
+
+  (defun with-faicon (icon str &optional height v-adjust)
+    "Displays an icon from Font Awesome icon."
+    (s-concat (all-the-icons-faicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str))
+
+  (defun with-fileicon (icon str &optional height v-adjust)
+    "Displays an icon from the Atom File Icons package."
+    (s-concat (all-the-icons-fileicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str))
+
+  (defun with-octicon (icon str &optional height v-adjust)
+    "Displays an icon from the GitHub Octicons."
+    (s-concat (all-the-icons-octicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str)))
+
+
+;; Hydra / Flycheck
+;; Group Flycheck commands.
+
+(pretty-hydra-define hydra-flycheck
+  (:hint nil :color teal :quit-key "q" :title (with-faicon "plane" "Flycheck" 1 -0.05))
+  ("Checker"
+   (("?" flycheck-describe-checker "describe")
+    ("d" flycheck-disable-checker "disable")
+    ("m" flycheck-mode "mode")
+    ("s" flycheck-select-checker "select"))
+   "Errors"
+   (("<" flycheck-previous-error "previous" :color pink)
+    (">" flycheck-next-error "next" :color pink)
+    ("f" flycheck-buffer "check")
+    ("l" flycheck-list-errors "list"))
+   "Other"
+   (("M" flycheck-manual "manual")
+    ("v" flycheck-verify-setup "verify setup"))))
+
+
+;; Hydra / Magit
+;; Group Magit commands.
+
+(pretty-hydra-define hydra-magit
+  (:hint nil :color teal :quit-key "q" :title (with-alltheicon "git" "Magit" 1 -0.05))
+  ("Action"
+   (("b" magit-blame "blame")
+    ("c" magit-clone "clone")
+    ("i" magit-init "init")
+    ("l" magit-log-buffer-file "commit log (current file)")
+    ("L" magit-log-current "commit log (project)")
+    ("s" magit-status "status"))))
+
+;; Hydra / Merge
+;; Group Merge commands.
+
+(pretty-hydra-define hydra-merge
+  (:hint nil :color pink :quit-key "q" :title (with-alltheicon "git" "Merge" 1 -0.05))
+  ("Move"
+   (("n" smerge-next "next")
+    ("p" smerge-prev "previous"))
+   "Keep"
+   (("RET" smerge-keep-current "current")
+    ("a" smerge-keep-all "all")
+    ("b" smerge-keep-base "base")
+    ("l" smerge-keep-lower "lower")
+    ("u" smerge-keep-upper "upper"))
+   "Diff"
+   (("<" smerge-diff-base-upper "upper/base")
+    ("=" smerge-diff-upper-lower "upper/lower")
+    (">" smerge-diff-base-lower "base/lower")
+    ("R" smerge-refine "redefine")
+    ("E" smerge-ediff "ediff"))
+   "Other"
+   (("C" smerge-combine-with-next "combine")
+    ("r" smerge-resolve "resolve")
+    ("k" smerge-kill-current "kill current"))))
+
+;; Hydra / Org
+;; Group Org commands.
+
+(pretty-hydra-define hydra-org
+  (:hint nil :color teal :quit-key "q" :title (with-fileicon "org" "Org" 1 -0.05))
+  ("Action"
+   (("A" my/org-archive-done-tasks "archive")
+    ("a" org-agenda "agenda")
+    ("c" org-capture "capture")
+    ("d" org-decrypt-entry "decrypt")
+    ("i" org-insert-link-global "insert-link")
+    ("j" my/org-jump "jump-task")
+    ("k" org-cut-subtree "cut-subtree")
+    ("o" org-open-at-point-global "open-link")
+    ("r" org-refile "refile")
+    ("s" org-store-link "store-link")
+    ("t" org-show-todo-tree "todo-tree"))))
+
+;; Hydra / Projectile
+;; Group Projectile commands.
+
+(pretty-hydra-define hydra-projectile
+  (:hint nil :color teal :quit-key "q" :title (with-faicon "rocket" "Projectile" 1 -0.05))
+  ("Buffers"
+   (("b" counsel-projectile-switch-to-buffer "list")
+    ("k" projectile-kill-buffers "kill all")
+    ("S" projectile-save-project-buffers "save all"))
+   "Find"
+   (("d" counsel-projectile-find-dir "directory")
+    ("D" projectile-dired "root")
+    ("f" counsel-projectile-find-file "file")
+    ("p" counsel-projectile-switch-project "project"))
+   "Other"
+   (("i" projectile-invalidate-cache "reset cache"))
+   "Search"
+   (("r" projectile-replace "replace")
+    ("R" projectile-replace-regexp "regexp replace")
+    ("s" counsel-rg "search"))))
+
 
 
 
@@ -903,45 +1002,222 @@
   :delight)
 
 
-;; Selectrum is an incremental completion and narrowing
-;; framework. Like Ivy and Helm, which it improves on, Selectrum
-;; provides a user interface for choosing from a list of options by
-;; typing a query to narrow the list, and then selecting one of the
-;; remaining candidates. This offers a significant improvement over
-;; the default Emacs interface for candidate selection.
-(use-package selectrum
-  :defer t
+;; Ivy
+(use-package ivy
+  :hook (after-init . ivy-mode)
+  :bind (("C-x b" . ivy-switch-buffer)
+         ("C-x B" . ivy-switch-buffer-other-window)
+         ("M-H"   . ivy-resume)
+         :map ivy-minibuffer-map
+         ("<tab>" . ivy-alt-done)
+         ("C-i" . ivy-partial-or-done)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-switch-buffer-kill))
   :init
-  ;; This doesn't actually load Selectrum.
-  (selectrum-mode +1))
+  (setq ivy-use-virtual-buffers t
+        ;; abbreviate turns home into ~ (for example)
+        ;; buffers still only get the buffer basename
+        ivy-virtual-abbreviate 'abbreviate
+        ivy-rich-path-style 'abbrev
+        ;; ivy-initial-inputs-alist nil ;; Don't start searches with ^
+        enable-recursive-minibuffers t
+        ivy-use-selectable-prompt t
+        ivy-magic-tilde nil
+        ivy-dynamic-exhibit-delay-ms 100
+        ivy-count-format "(%d/%d) "     ; Show current match and matches
+        ivy-extra-directories nil)) ; Do not show "./" and "../"
 
 
-;; Prescient is a library for intelligent sorting and
-;; filtering in various contexts.
+;; Swiper
+(use-package swiper
+  :after ivy
+  :bind (("C-s" . swiper)
+         ("C-r" . swiper)
+         :map swiper-map
+         ("M-%" . swiper-query-replace)))
+
+;; Counsel
+(use-package counsel
+  :after swiper
+  :init
+  (setq-default ivy-initial-inputs-alist
+              '((Man-completion-table . "^")
+                (woman . "^")))
+  (setq counsel-find-file-ignore-regexp "\\.DS_Store\\|.git")
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-r" . counsel-recentf)
+         ("C-x C-f" . counsel-find-file)
+         ("C-M-j" . counsel-switch-buffer)
+         ("M-?" . sanityinc/counsel-search-project)
+         :map minibuffer-local-map
+         ("C-r" . counsel-minibuffer-history))
+  :config
+  ;; Set minibuffer height for different commands
+  (setf (alist-get 'counsel-projectile-ag ivy-height-alist) 15)
+  (setf (alist-get 'counsel-projectile-rg ivy-height-alist) 15)
+  (setf (alist-get 'swiper ivy-height-alist) 15)
+  (setf (alist-get 'counsel-switch-buffer ivy-height-alist) 7)
+  ;; Use different regex strategies per completion command
+  (setq ivy-re-builders-alist '((counsel-rg . ivy--regex-plus)
+                                (counsel-projectile-rg . ivy--regex-plus)
+                                (counsel-ag . ivy--regex-plus)
+                                (counsel-projectile-ag . ivy--regex-plus)
+                                (swiper . ivy--regex-plus)
+                                (counsel-M-x . ivy--regex-plus)
+                                (t . ivy--regex-fuzzy)))
+  (when (require 'projectile)
+    (let ((search-function
+           (cond
+            ((executable-find "rg") 'counsel-rg)
+            ((executable-find "ag") 'counsel-ag))))
+      (when search-function
+        (defun sanityinc/counsel-search-project (initial-input &optional use-current-dir)
+          "Search using `counsel-rg' or similar from the project root for INITIAL-INPUT.
+          If there is no project root, or if the prefix argument
+          USE-CURRENT-DIR is set, then search from the current directory
+          instead."
+          (interactive (list (let ((sym (thing-at-point 'symbol)))
+                               (when sym (regexp-quote sym)))
+                             current-prefix-arg))
+          (let ((current-prefix-arg)
+                (dir (if use-current-dir
+                         default-directory
+                       (condition-case err
+                           (projectile-project-root)
+                         (error default-directory)))))))))))
+
+;; Ivy rich
+(use-package ivy-rich
+  :hook (ivy-mode . ivy-rich-mode)
+  :preface
+  (defun ivy-rich-branch-candidate (candidate)
+    "Displays the branch candidate of the candidate for ivy-rich."
+    (let ((candidate (expand-file-name candidate ivy--directory)))
+      (if (or (not (file-exists-p candidate)) (file-remote-p candidate))
+          ""
+        (format "%s%s"
+                (propertize
+                 (replace-regexp-in-string abbreviated-home-dir "~/"
+                                           (file-name-directory
+                                            (directory-file-name candidate)))
+                 'face 'font-lock-doc-face)
+                (propertize
+                 (file-name-nondirectory
+                  (directory-file-name candidate))
+                 'face 'success)))))
+
+  (defun ivy-rich-compiling (candidate)
+    "Displays compiling buffers of the candidate for ivy-rich."
+    (let* ((candidate (expand-file-name candidate ivy--directory)))
+      (if (or (not (file-exists-p candidate)) (file-remote-p candidate)
+              (not (magit-git-repo-p candidate)))
+          ""
+        (if (my/projectile-compilation-buffers candidate)
+            "compiling"
+          ""))))
+
+  (defun ivy-rich-file-group (candidate)
+    "Displays the file group of the candidate for ivy-rich"
+    (let ((candidate (expand-file-name candidate ivy--directory)))
+      (if (or (not (file-exists-p candidate)) (file-remote-p candidate))
+          ""
+        (let* ((group-id (file-attribute-group-id (file-attributes candidate)))
+               (group-function (if (fboundp #'group-name) #'group-name #'identity))
+               (group-name (funcall group-function group-id)))
+          (format "%s" group-name)))))
+
+  (defun ivy-rich-file-modes (candidate)
+    "Displays the file mode of the candidate for ivy-rich."
+    (let ((candidate (expand-file-name candidate ivy--directory)))
+      (if (or (not (file-exists-p candidate)) (file-remote-p candidate))
+          ""
+        (format "%s" (file-attribute-modes (file-attributes candidate))))))
+
+  (defun ivy-rich-file-size (candidate)
+    "Displays the file size of the candidate for ivy-rich."
+    (let ((candidate (expand-file-name candidate ivy--directory)))
+      (if (or (not (file-exists-p candidate)) (file-remote-p candidate))
+          ""
+        (let ((size (file-attribute-size (file-attributes candidate))))
+          (cond
+           ((> size 1000000) (format "%.1fM " (/ size 1000000.0)))
+           ((> size 1000) (format "%.1fk " (/ size 1000.0)))
+           (t (format "%d " size)))))))
+
+  (defun ivy-rich-file-user (candidate)
+    "Displays the file user of the candidate for ivy-rich."
+    (let ((candidate (expand-file-name candidate ivy--directory)))
+      (if (or (not (file-exists-p candidate)) (file-remote-p candidate))
+          ""
+        (let* ((user-id (file-attribute-user-id (file-attributes candidate)))
+               (user-name (user-login-name user-id)))
+          (format "%s" user-name)))))
+
+  (defun ivy-rich-switch-buffer-icon (candidate)
+    "Returns an icon for the candidate out of `all-the-icons'."
+    (with-current-buffer
+        (get-buffer candidate)
+      (let ((icon (all-the-icons-icon-for-mode major-mode :height 0.9)))
+        (if (symbolp icon)
+            (all-the-icons-icon-for-mode 'fundamental-mode :height 0.9)
+          icon))))
+  :config
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+  (plist-put ivy-rich-display-transformers-list
+             'counsel-find-file
+             '(:columns
+               ((ivy-rich-candidate                (:width 73))
+                (ivy-rich-file-user                (:width 8 :face font-lock-doc-face))
+                (ivy-rich-file-group               (:width 4 :face font-lock-doc-face))
+                (ivy-rich-file-modes               (:width 11 :face font-lock-doc-face))
+                (ivy-rich-file-size                (:width 7 :face font-lock-doc-face))
+                (ivy-rich-file-last-modified-time  (:width 30 :face font-lock-doc-face)))))
+  (plist-put ivy-rich-display-transformers-list
+             'counsel-projectile-switch-project
+             '(:columns
+               ((ivy-rich-branch-candidate         (:width 80))
+                (ivy-rich-compiling))))
+  (plist-put ivy-rich-display-transformers-list
+             'ivy-switch-buffer
+             '(:columns
+               ((ivy-rich-switch-buffer-icon        (:width 2))
+                (ivy-rich-candidate                 (:width 40))
+                (ivy-rich-switch-buffer-size        (:width 7))
+                (ivy-rich-switch-buffer-indicators  (:width 4 :face error :align right))
+                (ivy-rich-switch-buffer-major-mode  (:width 20 :face warning)))
+               :predicate (lambda (cand) (get-buffer cand))))
+  (plist-put ivy-rich-display-transformers-list
+             'counsel-M-x
+             '(:columns
+               ((counsel-M-x-transformer             (:width 40))
+                (ivy-rich-counsel-function-docstring :face font-lock-doc-face)))))
+
+
+
+(use-package all-the-icons-ivy
+  :after (all-the-icons ivy)
+  :init
+  (setq all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
+  :config
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-dired-jump)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-library)
+  (all-the-icons-ivy-setup))
+
+;; Prescient
 (use-package prescient
+  :defer
   :config
-  ;; Remember usage statistics across Emacs sessions.
-  (prescient-persist-mode +1)
-  ;; The default settings seem a little forgetful to me. Let's try
-  ;; this out.
-  (setq prescient-history-length 1000))
+  (prescient-persist-mode +1))
 
-;; Selectrum-prescient provides intelligent sorting and
-;; filtering for candidates in Selectrum menus.
-(use-package selectrum-prescient
-  :demand t
-  :after selectrum
-  :config
-  (selectrum-prescient-mode +1))
-
-
-;; Package `ctrlf' provides a replacement for `isearch' that is more
-;; similar to the tried-and-true text search interfaces in web
-;; browsers and other programs (think of what happens when you type
-;; ctrl+F).
-(use-package ctrlf
+(use-package ivy-prescient
+  :after (prescient counsel)
   :init
-  (ctrlf-mode +1))
+  (setq ivy-prescient-enable-filtering t)
+  :config
+  (ivy-prescient-mode +1))
+
+
+(use-package ivy-xref :after ivy)
 
 ;; Incremental parsing library
 (use-package tree-sitter
@@ -997,7 +1273,7 @@
         lsp-ui-sideline-show-code-actions nil
         lsp-ui-sideline-show-diagnostics t
         lsp-ui-doc-enable t
-        lsp-ui-doc-show-with-cursor t
+        lsp-ui-doc-show-with-cursor nil
         lsp-ui-doc-max-height 20
         lsp-ui-doc-max-width 80
         lsp-ui-doc-delay 0.2
@@ -1018,64 +1294,22 @@
 
 (use-package company
   :after lsp-mode
+  :init
+  (setq company-begin-commands '(self-insert-command)
+        company-idle-delay 0
+        company-minimum-prefix-length 3
+        company-show-numbers t
+        company-tooltip-align-annotations t)
   :bind (:map company-active-map
          ("<tab>" . company-complete-selection)
          ("C-n" . company-select-next)
-         ("C-p" . company-select-previous)
-         :filter (company-explicit-action-p)
-         ;; Make RET trigger a completion if and only if the user has
-         ;; explicitly interacted with Company, instead of always
-         ;; doing so.
-         ("<return>" . #'company-complete-selection)
-         ("RET" . #'company-complete-selection))
+         ("C-p" . company-select-previous))
   :config
-  ;; Make completions display twice as soon.
-  (setq company-idle-delay 0.15)
-
-  ;; Make completions display when you have only typed one character,
-  ;; instead of three.
-  (setq company-minimum-prefix-length 3)
-
-  ;; Always display the entire suggestion list onscreen, placing it
-  ;; above the cursor if necessary.
-  (setq company-tooltip-minimum company-tooltip-limit)
-
-  ;; Always display suggestions in the tooltip, even if there is only
-  ;; one. Also, don't display metadata in the echo area. (This
-  ;; conflicts with ElDoc.)
-  (setq company-frontends '(company-pseudo-tooltip-frontend))
-
-  ;; Show quick-reference numbers in the tooltip. (Select a completion
-  ;; with M-1 through M-0.)
-  (setq company-show-numbers t)
-
-  ;; Prevent non-matching input (which will dismiss the completions
-  ;; menu), but only if the user interacts explicitly with Company.
-  (setq company-require-match #'company-explicit-action-p)
-
-  ;; Only search the current buffer to get suggestions for
-  ;; `company-dabbrev' (a backend that creates suggestions from text
-  ;; found in your buffers). This prevents Company from causing lag
-  ;; once you have a lot of buffers open.
-  (setq company-dabbrev-other-buffers nil)
-
-  ;; Make the `company-dabbrev' backend fully case-sensitive, to
-  ;; improve the UX when working with domain-specific words that have
-  ;; particular casing.
-  (setq company-dabbrev-ignore-case nil)
-  (setq company-dabbrev-downcase nil)
-
-  ;; When candidates in the autocompletion tooltip have additional
-  ;; metadata, like a type signature, align that information to the
-  ;; right-hand side. This usually makes it look neater.
-  (setq company-tooltip-align-annotations t)
   (global-company-mode +1))
 
 (use-package company-prescient
-  :demand t
   :after company
   :config
-  ;; Use `prescient' for Company menus.
   (company-prescient-mode +1)
 
 
@@ -1094,11 +1328,6 @@
 
     (add-hook 'company-completion-started-hook 'sanityinc/page-break-lines-disable)
     (add-hook 'company-after-completion-hook 'sanityinc/page-break-lines-maybe-reenable)))
-
-
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-
 
 ;; Smartparens
 (use-package smartparens
@@ -1172,6 +1401,7 @@
   :hook (cmake-mode . cmake-font-lock-activate))
 
 (use-package cmake-ide
+  :after (projectile)
   :hook (c++-mode . my/cmake-ide-find-project)
   :preface
   (defun my/cmake-ide-find-project ()
@@ -1601,7 +1831,7 @@
                           (if-let ((pyvenv-directory (find-pyvenv-directory (buffer-file-name))))
                               (pyvenv-activate pyvenv-directory)))))
   :init
-  ;; (setq pyvenv-default-virtual-env-name "env")
+  (setq pyvenv-default-virtual-env-name "env")
   (setq pyvenv-mode-line-indicator '(pyvenv-virtual-env-name ("[venv:"
                                                               pyvenv-virtual-env-name "]")))
   :preface
@@ -1728,6 +1958,204 @@
 
 
 
+;; Org-Mode
+
+(defun nqa/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+        '(("^ *\\([-]\\) "
+           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+  ;; Set faces for heading levels
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1)))
+    (set-face-attribute (car face) nil :font "SF Pro Display" :weight 'regular :height (cdr face)))
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch))
+
+(defun nqa/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (visual-line-mode 1))
+
+
+(defun nqa/org-mode-visual-fill ()
+  (setq visual-fill-column-width 100
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+
+
+(use-package org
+  :pin org
+  :hook ((after-init . org-mode)
+         (org-mode . nqa/org-mode-setup)
+         (org-mode . nqa/org-mode-visual-fill))
+  :config
+  (setq org-ellipsis " ▾")
+
+  (setq org-agenda-start-with-log-mode t)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+
+  (setq org-agenda-files
+    '("~/Orgfiles/Tasks.org"
+      "~/Orgfiles/Habits.org"
+      "~/Orgfiles/Birthdays.org"))
+
+  (require 'org-habit)
+  (add-to-list 'org-modules 'org-habit)
+  (setq org-habit-graph-column 60)
+
+  (setq org-todo-keywords
+    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+
+  (setq org-refile-targets
+    '(("Archive.org" :maxlevel . 1)
+      ("Tasks.org" :maxlevel . 1)))
+
+  ;; Save Org buffers after refiling!
+  (advice-add 'org-refile :after 'org-save-all-org-buffers)
+
+  (setq org-tag-alist
+    '((:startgroup)
+      ;; Put mutually exclusive tags here
+      (:endgroup)
+      ("@errand" . ?E)
+      ("@home" . ?H)
+      ("@work" . ?W)
+      ("agenda" . ?a)
+      ("planning" . ?p)
+      ("publish" . ?P)
+      ("batch" . ?b)
+      ("note" . ?n)
+      ("idea" . ?i)))
+
+  ;; Configure custom agenda views
+  (setq org-agenda-custom-commands
+    '(("d" "Dashboard"
+       ((agenda "" ((org-deadline-warning-days 7)))
+        (todo "NEXT")
+        ((org-agenda-overriding-header "Next Tasks"))
+        (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+
+      ("n" "Next Tasks"
+       ((todo "NEXT")
+        ((org-agenda-overriding-header "Next Tasks"))))
+
+      ("W" "Work Tasks" tags-todo "+work-email")
+
+      ;; Low-effort next actions
+      ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+       ((org-agenda-overriding-header "Low Effort Tasks")
+        (org-agenda-max-todos 20)
+        (org-agenda-files org-agenda-files)))
+
+      ("w" "Workflow Status"
+       ((todo "WAIT")
+        ((org-agenda-overriding-header "Waiting on External")
+         (org-agenda-files org-agenda-files))
+        (todo "REVIEW")
+        ((org-agenda-overriding-header "In Review")
+         (org-agenda-files org-agenda-files))
+        (todo "PLAN")
+        ((org-agenda-overriding-header "In Planning")
+         (org-agenda-todo-list-sublevels nil)
+         (org-agenda-files org-agenda-files))
+        (todo "BACKLOG")
+        ((org-agenda-overriding-header "Project Backlog")
+         (org-agenda-todo-list-sublevels nil)
+         (org-agenda-files org-agenda-files))
+        (todo "READY")
+        ((org-agenda-overriding-header "Ready for Work")
+         (org-agenda-files org-agenda-files))
+        (todo "ACTIVE")
+        ((org-agenda-overriding-header "Active Projects")
+         (org-agenda-files org-agenda-files))
+        (todo "COMPLETED")
+        ((org-agenda-overriding-header "Completed Projects")
+         (org-agenda-files org-agenda-files))
+        (todo "CANC")
+        ((org-agenda-overriding-header "Cancelled Projects")
+         (org-agenda-files org-agenda-files))))))
+
+  (setq org-capture-templates
+    `(("t" "Tasks / Projects")
+      ("tt" "Task" entry (file+olp "~/Orgfiles/Tasks.org" "Inbox")
+       "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+
+      ("j" "Journal Entries")
+      ("jj" "Journal" entry
+       (file+olp+datetree "~/Orgfiles/Journal.org")
+       "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+       ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+       :clock-in :clock-resume
+       :empty-lines 1)
+      ("jm" "Meeting" entry
+       (file+olp+datetree "~/Orgfiles/Journal.org")
+       "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+       :clock-in :clock-resume
+       :empty-lines 1)
+
+      ("w" "Workflows")
+      ("we" "Checking Email" entry (file+olp+datetree "~/Orgfiles/Journal.org")
+       "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+
+      ("m" "Metrics Capture")
+      ("mw" "Weight" table-line (file+headline "~/Orgfiles/Metrics.org" "Weight")
+       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+
+  (define-key global-map (kbd "C-c j")
+    (lambda () (interactive) (org-capture nil "jj")))
+
+  (nqa/org-font-setup))
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+;; (org-babel-do-load-languages
+;;   'org-babel-load-languages
+;;   '((emacs-lisp . t)
+;;     (python . t)))
+
+;; (push '("conf-unix" . conf-unix) org-src-lang-modes)
+
+;; This is needed as of Org 9.2
+(require 'org-tempo)
+
+(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+(add-to-list 'org-structure-template-alist '("py" . "src python"))
+
+;; Automatically tangle our Emacs.org config file when we save it
+;; (defun nqa/org-babel-tangle-config ()
+;;   (when (string-equal (file-name-directory (buffer-file-name))
+;;                       (expand-file-name user-emacs-directory))
+;;     ;; Dynamic scoping to the rescue
+;;     (let ((org-confirm-babel-evaluate nil))
+;;       (org-babel-tangle))))
+
+;; (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'nqa/org-babel-tangle-config)))
+
+
 
 ;;; PDF
 
@@ -1757,9 +2185,6 @@
 
 
 ;;; Misc
-
-(add-hook 'after-init-hook 'transient-mark-mode)
-
 
 ;; Try packages without installing
 (use-package try :defer)
@@ -1831,7 +2256,6 @@
   (set-terminal-coding-system 'utf-8)
   (set-selection-coding-system (if (eq system-type 'windows-nt) 'utf-16-le 'utf-8))
   (prefer-coding-system 'utf-8))
-
 
 ;; Start emacs by default using the following directory
 (setq default-directory (expand-file-name "~/projects/"))
