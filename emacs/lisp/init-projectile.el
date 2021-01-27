@@ -4,7 +4,7 @@
 
 ;; Projectile - Project Intereaction Library
 (use-package projectile
-  :delight '(:eval (concat " " (projectile-project-name)))
+  ;; :delight '(:eval (concat " " (projectile-project-name)))
   :init
   (add-hook 'after-init-hook 'projectile-mode)
   (when (executable-find "rg")
@@ -33,11 +33,11 @@
   (def-projectile-commander-method ?\C-m
     "Find file in project."
     (call-interactively #'projectile-find-file))
-
+  :config
   ;; Use Selectrum (via `completing-read') for Projectile instead of
   ;; IDO.
-  (setq projectile-completion-system 'default)
-  (setq projectile-known-projects-file (expand-file-name "var/projectile-bookmarks.eld" user-emacs-directory)))
+  (setq projectile-completion-system 'default))
+  ;; (setq projectile-known-projects-file (expand-file-name "var/projectile-bookmarks.eld" user-emacs-directory)))
 
 
 

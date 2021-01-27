@@ -4,7 +4,7 @@
 
 (setq-default compilation-scroll-output t)
 
-(use-package alert)
+(use-package alert :defer)
 
 ;; Customize `alert-default-style' to get messages after compilation
 

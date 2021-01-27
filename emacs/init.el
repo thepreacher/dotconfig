@@ -17,28 +17,22 @@
 ;; Don't clutter user-emacs-directory with package and custom settings info
 (setq custom-file (expand-file-name "etc/custom.el" user-emacs-directory))
 
-;; Make startup faster by reducing the frequency of garbage
-;; collection.
-
-;; (defvar file-name-handler-alist-original file-name-handler-alist)
-
-;; (let ((normal-gc-cons-threshold (* 20 1024 1024))
-;;       (init-gc-cons-threshold (* 128 1024 1024)))
-;;   (setq gc-cons-threshold init-gc-cons-threshold)
-;;   (add-hook 'emacs-startup-hook ; hook run after loading init files
-;;       #'(lambda ()
-;;           (setq gc-cons-threshold normal-gc-cons-threshold
-;;            gc-cons-percentage 0.1
-;;            file-name-handler-alist file-name-handler-alist-original))))
+;; Variables configured via the interactive 'customize' interface
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 ;;----------------------------------------------------------------------------
 ;; Adjust garbage collection thresholds during startup, and thereafter
 ;;----------------------------------------------------------------------------
+(defvar file-name-handler-alist-original file-name-handler-alist)
+(setq file-name-handler-alist nil)
+
 (let ((normal-gc-cons-threshold (* 20 1024 1024))
       (init-gc-cons-threshold (* 128 1024 1024)))
   (setq gc-cons-threshold init-gc-cons-threshold)
   (add-hook 'emacs-startup-hook
-            (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
+            (lambda () (setq gc-cons-threshold normal-gc-cons-threshold
+                             file-name-handler-alist file-name-handler-alist-original))))
 
 ;; Dashboard package provides save feature hence I've commented this out. Uncomment when not using Dashboard
 (add-hook 'emacs-startup-hook
@@ -62,17 +56,15 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
+;;----------------------------------------------------------------------------
+;; Load configs for Use-Package - package configuration utility
+;;----------------------------------------------------------------------------
+(require 'init-use-package)
 
 ;;----------------------------------------------------------------------------
 ;; Load configs for vanila emacs without any external packages
 ;;----------------------------------------------------------------------------
 (require 'init-emacs)
-
-
-;;----------------------------------------------------------------------------
-;; Load configs for Use-Package - package configuration utility
-;;----------------------------------------------------------------------------
-(require 'init-use-package)
 
 
 ;;----------------------------------------------------------------------------
@@ -82,10 +74,10 @@
 ;;
 (require 'init-constants)
 ;; (require 'init-frame-hooks)
-(require 'init-themes)
-(require 'init-modeline)
 (when *is-a-mac*
   (require 'init-macos))
+(require 'init-themes)
+(require 'init-modeline)
 (require 'init-gui-frames)
 (require 'init-dired)
 (require 'init-buffer-search)
@@ -101,6 +93,7 @@
 ;; (require 'init-sessions)
 ;;
 (require 'init-editing-utils)
+(require 'init-snippets)
 ;;
 ;; (require 'init-vc)
 ;; (require 'init-darcs)
@@ -140,6 +133,7 @@
 ;; (require 'init-pdf)
 ;;
 
+(require 'init-treemacs)
 (require 'init-misc)
 ;; (require 'init-dashboad)
 
@@ -172,10 +166,6 @@
             (require 'server)
             (unless (server-running-p)
               (server-start))))
-
-;; Variables configured via the interactive 'customize' interface
-(when (file-exists-p custom-file)
-  (load custom-file))
 
 
 ;; Start emacs by default using the following directory

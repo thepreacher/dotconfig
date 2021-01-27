@@ -12,20 +12,12 @@
   ;; ;; for executable of language server, if it's not symlinked on your PATH
   ;; (add-to-list 'exec-path (expand-file-name "~/lang-servers/elixir-ls/release/")) ;; Uncomment for lsp-mode
   :config
-  (use-package flycheck-credo
-    :init
-    (setq flycheck-elixir-credo-strict t)
-    :config
-    (flycheck-credo-setup)
-
-    (add-hook 'lsp-after-initialize-hook
-        (lambda ()
-          (lsp--set-configuration `(:elixirLS, lsp-elixir--config-options))))))
+  (add-hook 'lsp-after-initialize-hook
+            (lambda ()
+              (lsp--set-configuration `(:elixirLS, lsp-elixir--config-options)))))
 
 
 
-
-          
 
 (provide 'init-elixir)
 ;;; init-elixir.el ends here

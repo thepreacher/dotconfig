@@ -2,6 +2,15 @@
 ;;; Commentary:
 ;;; Code:
 
+;; Prescient is a library for intelligent sorting and
+;; filtering in various contexts.
+(use-package prescient
+  :config
+  ;; Remember usage statistics across Emacs sessions.
+  (prescient-persist-mode 1)
+  ;; The default settings seem a little forgetful to me. Let's try
+  ;; this out.
+  (setq prescient-history-length 1000))
 
 (use-package selectrum
   :init
@@ -11,7 +20,6 @@
     :config
     (setq selectrum-refine-candidates-function #'orderless-filter)
     (setq selectrum-highlight-candidates-function #'orderless-highlight-matches)
-    (prescient-persist-mode 1)
     (selectrum-prescient-mode 1)
     (global-set-key [remap execute-extended-command] 'execute-extended-command))
 
@@ -57,23 +65,23 @@
 
     (use-package embark-consult
       :config
-      (require 'embark-consult)
       (add-hook 'embark-collect-mode-hook 'embark-consult-preview-minor-mode))
 
     (use-package consult-flycheck
       :bind (:map flycheck-command-map
-                  ("!" . consult-flycheck))))
+              ("!" . consult-flycheck))))
 
   (use-package marginalia
     :init
-    (add-hook 'after-init-hook 'marginalia-mode)
+    ;; (add-hook 'after-init-hook 'marginalia-mode)
 
     ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
     (advice-add #'marginalia-cycle :after
                 (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit))))
 
-    (setq-default marginalia-annotators '(marginalia-annotators-heavy))))
-
+    (setq-default marginalia-annotators '(marginalia-annotators-heavy))
+    :config
+    (marginalia-mode)))
 
 
 

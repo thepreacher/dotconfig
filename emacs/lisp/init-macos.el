@@ -4,7 +4,7 @@
 
 ;;; Make environment variables available in Emacs
 (use-package exec-path-from-shell
-  :if (memq window-system '(mac ns x))
+  :if (memq window-system '(mac ns))
   :init
   (setq exec-path-from-shell-debug nil)
   ;; (setq exec-path-from-shell-arguments '("-l"))
@@ -26,7 +26,6 @@
   (setq mouse-wheel-scroll-amount '(1
                                      ((shift) . 5)
                                      ((control)))))
-
 
 
 

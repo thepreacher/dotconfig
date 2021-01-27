@@ -38,7 +38,9 @@
           ("<tab>" . company-complete-common)
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous)
-          ("M-." . company-show-location))
+          ("M-." . company-show-location)
+         :map company-mode-map
+          ("M-/" . company-complete))
   :config
   ;; Make completions display twice as soon.
   (setq company-idle-delay 0)
@@ -105,6 +107,8 @@
     (add-hook 'company-after-completion-hook 'sanityinc/page-break-lines-maybe-reenable)))
 
 
+;; General keybindings
+(global-set-key (kbd "M-C-/") 'company-complete)
 
 
 (provide 'init-company)

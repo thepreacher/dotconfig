@@ -29,12 +29,14 @@
 
 
 (use-package lsp-pyright
-  :after lsp-mode
+  :defer
+  ;; :after lsp-mode
   :if (executable-find "pyright")
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright))))
 
-(use-package python
+(use-package python-mode
+  :ensure nil
   :mode "\\.py\\'"
   :delight "π "
   :bind (("M-[" . python-nav-backward-block)
@@ -52,21 +54,8 @@
 
 (use-package py-isort
   :after python
-  :hook ((python-mode . pyvenv-mode)
-         (before-save . py-isort-before-save)))
+  :hook (before-save . py-isort-before-save))
 
-(use-package pyenv-mode
-  :after python
-  :hook ((python-mode . pyenv-mode)
-         (projectile-switch-project . projectile-pyenv-mode-set))
-  :init (setq pyenv-mode-set "3.9.1")
-  :preface
-  (defun projectile-pyenv-mode-set ()
-    "Set pyenv version matching project name."
-    (let ((project (projectile-project-name)))
-      (if (member project (pyenv-mode-versions))
-          (pyenv-mode-set project)
-        (pyenv-mode-unset)))))
 
 (use-package pyvenv
   :after python

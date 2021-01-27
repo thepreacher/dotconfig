@@ -8,9 +8,6 @@
 (use-package dash :defer)
 (use-package dash-functional :defer)
 
-(use-package evil-nerd-commenter
-  :bind ("M-/" . evilnc-comment-or-uncomment-lines))
-
 
 ;; Super-save auto-saves your buffers, when certain events happen
 (use-package super-save

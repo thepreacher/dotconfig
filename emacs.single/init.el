@@ -984,7 +984,7 @@
     ;;       consult-view-list-function #'bookmark-view-names)
 
     ;; Optionally configure a function which returns the project root directory
-    (autoload 'projectile-project-root "projectile")
+    ; (autoload 'projectile-project-root "projectile")
     (setq consult-project-root-function #'projectile-project-root))
 
 

@@ -15,6 +15,15 @@
 (use-package doom-themes
   :config
   (load-theme 'doom-dracula t)
+
+  ; Set cursor color to white
+  (set-cursor-color "#ffb86c")
+
+  ;; Set here because the colours only make sense in the context of dracula theme
+  (set-face-background 'show-paren-match "#ffb86c") ;; #262b36 previous
+  (set-face-bold 'show-paren-match t)
+  (set-face-foreground 'show-paren-match "#ffffff")
+
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
 

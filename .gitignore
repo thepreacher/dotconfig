@@ -18,3 +18,8 @@ transient/
 places
 backups/
 amx-items
+.zsh_history
+.zprofile
+.zshrc
+.p10k.zsh
+cache/

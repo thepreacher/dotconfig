@@ -6,33 +6,33 @@
 ;; Language Server Protocol
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
-  :hook ((java-mode
-          python-mode
-          go-mode
-          js-mode
-          js2-mode
-          typescript-mode
-          web-mode
-          c-mode
-          cpp-mode
-          objc-mode
-          elixir-mode
-          elm-mode
-          rust-mode
-          haskell-literate-mode
-          haskell-mode) . lsp-deferred)
-        (lsp-mode . lsp-enable-which-key-integration)
-        (lsp-mode . (lambda ()
-                      (add-hook 'before-save-hook 'lsp-format-buffer nil t)))
+  :hook (
+          ((java-mode
+             python-mode
+             go-mode
+             js-mode
+             js2-mode
+             typescript-mode
+             web-mode
+             c-mode
+             cpp-mode
+             objc-mode
+             elixir-mode
+             elm-mode
+             rust-mode
+             haskell-literate-mode
+             haskell-mode) . lsp-deferred)
+          (lsp-mode . lsp-enable-which-key-integration)
+          (lsp-mode . (lambda ()
+                        (add-hook 'before-save-hook 'lsp-format-buffer nil t))))
   :init
   ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
   (setq lsp-print-io nil ;; Set to t when debugging lsp errors
-        lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr")
-        lsp-enable-snippet nil
-        lsp-prefer-flymake nil
+        ;; lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr")
+        lsp-enable-snippet t
         lsp-lens-enable nil
         lsp-idle-delay 0.5
-        lsp-session-file (expand-file-name "var/.lsp-session-v1" user-emacs-directory)
+        ;; lsp-session-file (expand-file-name "var/.lsp-session-v1" user-emacs-directory)
         lsp-modeline-diagnostics-enable t
         lsp-modeline-diagnostics-scope :workspace
         lsp-completion-provider :capf
@@ -72,14 +72,44 @@
         lsp-ui-doc-max-height 20
         lsp-ui-doc-max-width 80
         lsp-ui-doc-delay 0.2
-        lsp-ui-doc-position 'bottom))
+        lsp-ui-doc-position 'bottom)
+  :bind (:map lsp-ui-mode-map
+          ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+          ([remap xref-find-references] . lsp-ui-peek-find-references)
+          ("C-c u" . lsp-ui-imenu)))
+
+
 
 (use-package dap-mode
   :after lsp-mode
-  :init
-  (add-hook 'after-init-hook #'(lambda ()
-                                 (dap-mode)
-                                 (dap-ui-mode))))
+  :bind
+  (:map dap-mode-map
+    (("<f12>" . dap-debug)
+     ("<f8>" . dap-continue)
+     ("<f9>" . dap-next)
+     ("<M-f11>" . dap-step-in)
+     ("C-M-<f11>" . dap-step-out)
+     ("<f7>" . dap-breakpoint-toggle)))
+  :hook  ((python-mode . (lambda () (require 'dap-python)))
+          (haskell-mode . (lambda () (require 'dap-haskell)))
+          (rust-mode . (lambda () (require 'dap-gdb-lldb)))
+          (ruby-mode . (lambda () (require 'dap-ruby)))
+          (go-mode . (lambda () (require 'dap-go)))
+          (java-mode . (lambda () (require 'dap-java)))
+          ((c-mode c++-mode objc-mode swift) . (lambda () (require 'dap-lldb)))
+          (php-mode . (lambda () (require 'dap-php)))
+          (elixir-mode . (lambda () (require 'dap-elixir)))
+          ((js-mode js2-mode typescript-mode) . (lambda () (require 'dap-firefox))))
+  :config
+  (dap-mode 1)
+  (use-package dap-ui
+    :ensure nil
+    :config
+    (dap-ui-mode t))
+  (dap-tooltip-mode t)
+  (tooltip-mode t))
+
+
 
 
 (provide 'init-lsp)

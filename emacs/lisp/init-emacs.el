@@ -52,7 +52,7 @@
 (setq history-delete-duplicates t
       history-length t
       savehist-additional-variables '(kill-ring search-ring regexp-search-ring)
-      savehist-file (expand-file-name "var/history" user-emacs-directory)
+      ;; savehist-file (expand-file-name "var/history" user-emacs-directory)
       savehist-save-minibuffer-history 1)
 
 
@@ -122,6 +122,10 @@
 
 
 ;; Show matching parens
+
+;; don't delay show parens immediately
+(setq show-paren-delay 0)
+(setq show-paren-style 'parenthesis)
 (add-hook 'after-init-hook 'show-paren-mode)
 
 
@@ -138,7 +142,7 @@
 (setq-default recentf-auto-cleanup 'never
               recentf-max-saved-items 500
               recentf-max-menu-items 15
-              recentf-save-file (concat user-emacs-directory "var/recentf")
+              ;; recentf-save-file (concat user-emacs-directory "var/recentf")
               recentf-exclude (list "COMMIT_EDITMSG"
                                     "~$"
                                     "/scp:"
@@ -151,8 +155,9 @@
                                     "/sudo.*\\'"
                                     "/node_modules/.*\\'"
                                     (concat package-user-dir "/.*-autoloads\\.el\\'")))
-
-
+                                    
+(add-to-list 'recentf-exclude no-littering-var-directory)
+(add-to-list 'recentf-exclude no-littering-etc-directory)
 
 
 
@@ -184,6 +189,10 @@
 
 
 ;;;; General keybindings
+
+;; Rebind `comment-dwim to `comment-line M-;
+(global-set-key [remap comment-dwim] #'comment-line)
+
 
 ;;; Newline behaviour
 (global-set-key (kbd "RET") 'newline-and-indent)
