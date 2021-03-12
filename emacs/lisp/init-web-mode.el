@@ -7,13 +7,6 @@
 
 ;; Web-mode - An autonomous emacs major-mode for editing web templates.
 
-;; Elixir plus Liveview templates
-(add-to-list 'auto-mode-alist
-             '("\\.l?eex\\'" . (lambda ()
-                               ;; add major mode setting here, if needed, for example:
-                               ;; (text-mode)
-                                (add-hook 'before-save-hook 'web-beautify-html-buffer t t))))
-
 (use-package web-mode
   :delight "☸ "
   :hook ((css-mode web-mode) . rainbow-mode)
@@ -22,20 +15,8 @@
          ("\\.jsx\\'" . web-mode)
          ("\\.l?eex\\'" . web-mode)
          ("\\.php$" . my/php-setup))
-  :preface
-  (defun enable-minor-mode (my-pair)
-    "Enable minor mode if filename match the regexp."
-    (if (buffer-file-name)
-        (if (string-match (car my-pair) buffer-file-name)
-            (funcall (cdr my-pair)))))
   :init
-  (setq web-mode-code-indent-offset                   2
-        web-mode-markup-indent-offset                 2
-        web-mode-css-indent-offset                    2
-        web-mode-markup-indent-offset                 2
-        web-mode-code-indent-offset                   2
-        web-mode-comment-style                        2
-        web-mode-enable-block-face                    nil
+  (setq web-mode-enable-block-face                    nil
         web-mode-enable-comment-annotation            t
         web-mode-enable-css-colorization              t
         web-mode-enable-current-column-highlight      t
@@ -56,21 +37,29 @@
         web-mode-enable-auto-indentation              t
         web-mode-enable-auto-closing                  nil
         web-mode-enable-auto-opening                  nil
-        web-mode-enable-auto-pairing                  t
-        web-mode-enable-auto-quoting                  t))
+        ;; make web-mode play nice with smartparens
+        web-mode-enable-auto-pairing                  nil
+        web-mode-enable-auto-quoting                  t)
+  :custom
+  (web-mode-code-indent-offset                   2)
+  (web-mode-markup-indent-offset                 2)
+  (web-mode-css-indent-offset                    2)
+  (web-mode-markup-indent-offset                 2)
+  (web-mode-code-indent-offset                   2)
+  (web-mode-comment-style                        2)
+  :config
 
+  (sp-with-modes '(web-mode)
+    (sp-local-pair "%" "%"
+                   :unless '(sp-in-string-p)
+                   :post-handlers '(((lambda (&rest _ignored)
+                                       (just-one-space)
+                                       (save-excursion (insert " ")))
+                                     "SPC" "=" "#")))
+    (sp-local-tag "%" "<% "  " %>")
+    (sp-local-tag "=" "<%= " " %>")
+    (sp-local-tag "#" "<%# " " %>")))
 
-(add-hook 'web-mode-hook #'(lambda ()
-                             (enable-minor-mode
-                              '("\\.js?\\'" . prettier-js-mode))))
-
-(add-hook 'web-mode-hook #'(lambda ()
-                             (enable-minor-mode
-                              '("\\.jsx?\\'" . prettier-js-mode))))
-
-(add-hook 'web-mode-hook #'(lambda ()
-                             (enable-minor-mode
-                              '("\\.ts?\\'" . prettier-js-mode))))
 
 
 

@@ -49,7 +49,10 @@
 (require 'cl-lib)
 
 ;; Package sources
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(unless (assoc-default "melpa" package-archives)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
+(unless (assoc-default "org" package-archives)
+  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t))
 
 
 (package-initialize)
@@ -59,8 +62,8 @@
 ;;----------------------------------------------------------------------------
 ;; Load configs for Use-Package - package configuration utility
 ;;----------------------------------------------------------------------------
-(require 'init-use-package)
-
+(require 'init-packages)
+(require 'init-general)
 ;;----------------------------------------------------------------------------
 ;; Load configs for vanila emacs without any external packages
 ;;----------------------------------------------------------------------------
@@ -74,6 +77,7 @@
 ;;
 (require 'init-constants)
 ;; (require 'init-frame-hooks)
+;;
 (when *is-a-mac*
   (require 'init-macos))
 (require 'init-themes)
@@ -84,14 +88,15 @@
 (require 'init-grep)
 (require 'init-uniquify)
 (require 'init-buffers)
-(require 'init-flycheck)
+;;
+(require 'init-evil-mode)
 ;;
 (require 'init-selectrum)
 (require 'init-hippie-expand)
-(require 'init-company)
 (require 'init-windows)
 ;; (require 'init-sessions)
 ;;
+(require 'init-flycheck)
 (require 'init-editing-utils)
 (require 'init-snippets)
 ;;
@@ -104,6 +109,7 @@
 ;;
 (require 'init-compile)
 (require 'init-lsp)
+(require 'init-company)
 (require 'init-markdown)
 ;; (require 'init-csv)
 ;; (require 'init-erlang)
@@ -136,6 +142,7 @@
 (require 'init-treemacs)
 (require 'init-misc)
 ;; (require 'init-dashboad)
+(require 'init-auto-package-update)
 
 
 
@@ -161,11 +168,11 @@
   (add-hook 'prog-mode-hook 'display-line-numbers-mode))
 
 ;; Allow access from emacsclient
-(add-hook 'after-init-hook
-          (lambda ()
-            (require 'server)
-            (unless (server-running-p)
-              (server-start))))
+;; (add-hook 'after-init-hook
+;;           (lambda ()
+;;             (require 'server)
+;;             (unless (server-running-p)
+;;               (server-start))))
 
 
 ;; Start emacs by default using the following directory

@@ -12,10 +12,11 @@
 ;; Super-save auto-saves your buffers, when certain events happen
 (use-package super-save
   :init
-  (add-hook 'after-init-hook 'super-save-mode t)
+  (add-hook 'after-init-hook 'super-save-mode)
   :config
-  (setq super-save-idle-duration 5)
+  ;; (setq super-save-idle-duration 10)
   (setq super-save-auto-save-when-idle t)
+  (setq super-save-remote-files nil)
   (setq super-save-exclude '(".gpg"))
   ;; save on find-file
   (add-to-list 'super-save-hook-triggers 'find-file-hook))
@@ -29,6 +30,7 @@
 (use-package crux
   :bind(("C-k" . crux-smart-kill-line)
         ("M-o" . crux-smart-open-line)
+        ("M-O" . crux-smart-open-line-above)
         ("C-c n" . crux-cleanup-buffer-or-region)
         ("C-c e" . crux-eval-and-replace)
         ("C-c D" . crux-delete-file-and-buffer)
@@ -56,8 +58,8 @@
 ;; Moves the current line (or if marked, the current region’s, whole lines).
 (use-package move-text
   :bind (("M-p" . move-text-up)
-         ("M-n" . move-text-down))
-  :config (move-text-default-bindings))
+         ("M-n" . move-text-down)))
+
 
 ;; Aggressive-indent
 (use-package aggressive-indent
@@ -181,7 +183,6 @@
 ;; If you expand too far, you can contract the region by pressing - (minus key),
 ;; or by prefixing the shortcut you defined with a negative argument: C-- C-=.
 (use-package expand-region
-  :commands (er/expand-region er/contract-region)
   :bind (("C-=" . er/expand-region)))
 
 (use-package multiple-cursors
@@ -192,10 +193,12 @@
         ("C-c C-<" . mc/mark-all-like-this)))
 
 (use-package beacon
+  :init
+  (add-hook 'after-init-hook 'beacon-mode)
   :config
   (setq-default beacon-lighter "")
-  (setq-default beacon-size 20)
-  (add-hook 'after-init-hook 'beacon-mode))
+  (setq-default beacon-size 20))
+
 
 ;; hungry-delete
 ;; Deleting a whitespace character will delete all whitespace until the next non-whitespace character.
@@ -223,8 +226,17 @@
 
 (global-set-key [remap just-one-space] 'cycle-spacing)
 
-
-
+;; Smartparens
+(use-package smartparens
+  :commands smartparens-global-mode
+  :hook (prog-mode-hook markdown-mode-hook)
+  :config
+  ;; smart pairing for all
+  (require 'smartparens-config)
+  (setq sp-base-key-bindings 'paredit)
+  (setq sp-autoskip-closing-pair 'always)
+  (setq sp-hybrid-kill-entire-symbol nil)
+  (sp-use-paredit-bindings))
 
 ;; General keybindings
 

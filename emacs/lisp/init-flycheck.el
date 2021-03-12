@@ -5,7 +5,13 @@
 (use-package flycheck
   :init
   (add-hook 'after-init-hook #'global-flycheck-mode)
-  (setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list))
+  :config
+  ;; Optionally add the `consult-flycheck' command.
+  (use-package consult-flycheck
+    ;; :requires flycheck
+    :after consult
+    :bind (:map flycheck-command-map
+            ("!" . consult-flycheck))))
 
 
 

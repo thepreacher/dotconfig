@@ -1,4 +1,9 @@
-nvim/
+nvim/after/
+nvim/lua/
+nvim/pack/
+nvim/spell/
+nvim/syntax/
+nvim/ultisnips/
 automatic_backups/
 configstore/
 elpa/
@@ -7,8 +12,12 @@ etc/
 early-init-do-not-edit/
 *.backup
 *.backup/
+*.backup*
+*.backup*/
 *.test
 *.test/
+*.test*
+*.test*/
 \#*#
 .lsp-session-v1
 .extension/
@@ -18,8 +27,10 @@ transient/
 places
 backups/
 amx-items
+.zsh_sessions/
 .zsh_history
 .zprofile
 .zshrc
 .p10k.zsh
 cache/
+emacsbackups/

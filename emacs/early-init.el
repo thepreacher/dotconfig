@@ -13,11 +13,11 @@
     (scroll-bar-mode -1))
 
 
-(defvar efs/default-font-size 150)
-(defvar efs/default-variable-font-size 150)
+(defvar nqa/default-font-size 150)
+(defvar nqa/default-variable-font-size 150)
 
 ;; Make frame transparency overridable
-(defvar efs/frame-transparency '(90 . 90))
+(defvar nqa/frame-transparency '(90 . 90))
 
 
 ;; Ref: https://github.com/hlissner/doom-emacs/blob/develop/early-init.el
@@ -30,17 +30,17 @@
 (add-to-list 'initial-frame-alist '(height . 58))
 
 ;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-(add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+(set-frame-parameter (selected-frame) 'alpha nqa/frame-transparency)
+(add-to-list 'default-frame-alist `(alpha . ,nqa/frame-transparency))
 
 ;;; Font Configuration
-(set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height efs/default-font-size)
+(set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height nqa/default-font-size)
 
 ;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height efs/default-font-size)
+(set-face-attribute 'fixed-pitch nil :font "JetBrainsMono Nerd Font" :height nqa/default-font-size)
 
 ;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "SF Pro Display" :height efs/default-variable-font-size :weight 'regular)
+(set-face-attribute 'variable-pitch nil :font "SF Pro Display" :height nqa/default-variable-font-size :weight 'regular)
 
 
 

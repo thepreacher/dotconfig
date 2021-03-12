@@ -1,5 +1,6 @@
 #git@github.com:ekalinin/github-markdown-toc.git
 #git@github.com:marlonrichert/zsh-hist.git
+asdf-community/asdf-direnv
 git@github.com:marlonrichert/zsh-autocomplete.git
 git@github.com:marlonrichert/zsh-edit.git
 git@github.com:marlonrichert/zsh-snap.git
@@ -7,3 +8,4 @@ git@github.com:MichaelAquilina/zsh-you-should-use.git
 git@github.com:romkatv/powerlevel10k.git
 git@github.com:zsh-users/zsh-autosuggestions.git
 git@github.com:zsh-users/zsh-syntax-highlighting.git
+marlonrichert/zcolors

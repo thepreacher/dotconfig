@@ -16,6 +16,7 @@
 (setq use-package-verbose t)
 (setq use-package-compute-statistics t)
 
+
 (let ((package-check-signature nil))
   (use-package gnu-elpa-keyring-update))
 
@@ -53,5 +54,5 @@
 
 
 
-(provide 'init-use-package)
+(provide 'init-packages)
 ;;; init-use-package.el ends here

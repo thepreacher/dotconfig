@@ -5,7 +5,6 @@
 
 ;; Icons - Reqired by some themes
 (use-package all-the-icons
-  :defer
   :if (display-graphic-p)
   :init (unless (find-font (font-spec :name "all-the-icons"))
           (all-the-icons-install-fonts t)))

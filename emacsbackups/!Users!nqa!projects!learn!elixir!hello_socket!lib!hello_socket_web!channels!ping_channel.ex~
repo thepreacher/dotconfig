@@ -1,0 +1,3 @@
+defmodule HelloSocketWeb.PingChannel do
+  use Phoenix.Channel
+end

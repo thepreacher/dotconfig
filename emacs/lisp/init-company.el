@@ -16,72 +16,45 @@
 ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Completion-Styles.html
 ;; (add-to-list 'completion-styles 'initials t)
 
-(use-package orderless
-  :custom
-  (completion-styles '(orderless))
-  :config
-  (setq orderless-component-separator " +"))
+(defun nqa/company-complete-selection ()
+  "Insert the selected candidate or the first if none are selected."
+  (interactive)
+  (if company-selection
+      (company-complete-selection)
+    (company-complete-number 1)))
 
 (use-package company
-  :after orderless
   :init
-  (add-hook 'after-init-hook 'global-company-mode t)
+  (add-hook 'after-init-hook 'global-company-mode)
   (defun just-one-face (fn &rest args)
     (let ((orderless-match-faces [completions-common-part]))
       (apply fn args)))
 
   (advice-add 'company-capf--candidates :around #'just-one-face)
+  :after lsp-mode
+  ;; :hook (lsp-mode . company-mode)
   :bind (:map company-active-map
           ("RET" . nil)
           ("[return]" . nil)
-          ("TAB" . company-complete-common)
-          ("<tab>" . company-complete-common)
-          ("C-n" . company-select-next)
-          ("C-p" . company-select-previous)
-          ("M-." . company-show-location)
-         :map company-mode-map
-          ("M-/" . company-complete))
+          ("TAB" . nqa/company-complete-selection)
+          ("<tab>" . nqa/company-complete-selection)
+          ("M-." . company-show-location))
   :config
   ;; Make completions display twice as soon.
-  (setq company-idle-delay 0)
-
-  ;; Make completions display when you have only typed one character,
-  ;; instead of three.
+  (setq company-idle-delay 0.0)
   (setq company-minimum-prefix-length 3)
-
-  ;; Always display the entire suggestion list onscreen, placing it
-  ;; above the cursor if necessary.
-  (setq company-tooltip-minimum company-tooltip-limit)
-
-  ;; Always display suggestions in the tooltip, even if there is only
-  ;; one. Also, don't display metadata in the echo area. (This
-  ;; conflicts with ElDoc.)
-  (setq company-frontends '(company-pseudo-tooltip-frontend))
-
-  ;; Show quick-reference numbers in the tooltip. (Select a completion
-  ;; with M-1 through M-0.)
+  ;; (setq company-tooltip-minimum company-tooltip-limit)
+  ;; (setq company-frontends '(company-pseudo-tooltip-frontend))
   (setq company-show-numbers t)
-
-  ;; Prevent non-matching input (which will dismiss the completions
-  ;; menu), but only if the user interacts explicitly with Company.
-  (setq company-require-match #'company-explicit-action-p)
-
-  ;; Only search the current buffer to get suggestions for
-  ;; `company-dabbrev' (a backend that creates suggestions from text
-  ;; found in your buffers). This prevents Company from causing lag
-  ;; once you have a lot of buffers open.
+  ;; (setq company-require-match #'company-explicit-action-p)
   (setq company-dabbrev-other-buffers nil)
-
-  ;; Make the `company-dabbrev' backend fully case-sensitive, to
-  ;; improve the UX when working with domain-specific words that have
-  ;; particular casing.
   (setq company-dabbrev-ignore-case nil)
   (setq company-dabbrev-downcase nil)
-
-  ;; When candidates in the autocompletion tooltip have additional
-  ;; metadata, like a type signature, align that information to the
-  ;; right-hand side. This usually makes it look neater.
   (setq company-tooltip-align-annotations t))
+
+;; With use-package:
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 
 (use-package company-prescient
   :after company

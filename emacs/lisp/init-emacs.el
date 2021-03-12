@@ -105,11 +105,9 @@
 ;; cua goodness without copy/paste etc.
 (cua-selection-mode t)
 
-(when (fboundp 'electric-pair-mode)
-  (add-hook 'after-init-hook 'electric-pair-mode))
-(add-hook 'after-init-hook 'electric-indent-mode)
-
-
+;; (when (fboundp 'electric-pair-mode)
+;;   (add-hook 'after-init-hook 'electric-pair-mode))
+;; (add-hook 'after-init-hook 'electric-indent-mode)
 
 
 ;; Don't disable narrowing commands
@@ -155,7 +153,7 @@
                                     "/sudo.*\\'"
                                     "/node_modules/.*\\'"
                                     (concat package-user-dir "/.*-autoloads\\.el\\'")))
-                                    
+
 (add-to-list 'recentf-exclude no-littering-var-directory)
 (add-to-list 'recentf-exclude no-littering-etc-directory)
 
@@ -183,12 +181,15 @@
   (add-hook 'dired-mode-hook 'auto-revert-mode))
 
  ;; Abbreviations
-(setq abbrev-file-name (expand-file-name "abbrev_defs" user-emacs-directory))
+(setq abbrev-file-name (expand-file-name "abbrev_dnqa" user-emacs-directory))
 (if (file-exists-p abbrev-file-name)
     (quietly-read-abbrev-file))
 
 
 ;;;; General keybindings
+
+;; Make ESC behave like "C-g"
+(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 
 ;; Rebind `comment-dwim to `comment-line M-;
 (global-set-key [remap comment-dwim] #'comment-line)

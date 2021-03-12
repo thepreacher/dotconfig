@@ -28,14 +28,10 @@
   :init
   ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
   (setq lsp-print-io nil ;; Set to t when debugging lsp errors
-        ;; lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr")
-        lsp-enable-snippet t
         lsp-lens-enable nil
         lsp-idle-delay 0.5
-        ;; lsp-session-file (expand-file-name "var/.lsp-session-v1" user-emacs-directory)
         lsp-modeline-diagnostics-enable t
         lsp-modeline-diagnostics-scope :workspace
-        lsp-completion-provider :capf
         lsp-restart 'auto-restart
         lsp-eldoc-enable-hover t ;; Eldoc
         lsp-enable-symbol-highlighting nil

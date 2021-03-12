@@ -8,23 +8,14 @@
   :hook (css-mode sgml-mode html-mode web-mode))
 
 (use-package yasnippet
-  :commands (yas-reload-all yas-minor-mode)
-  :delight yas-minor-mode " υ"
-  :init
-  (setq-default yas-snippet-dirs (list (concat user-emacs-directory "snippets")))
-  :hook ((yas-minor-mode . my/disable-yas-if-no-snippets))
-  :preface
-  (defun my/disable-yas-if-no-snippets ()
-    (when (and yas-minor-mode (null (yas--get-snippet-tables)))
-      (yas-minor-mode -1)))
-  :config
-  (yas-global-mode 1))
-
-
+  :hook (after-init . yas-global-mode)
+  :custom
+  (yas-verbosity 2)
+  (yas-wrap-around-region t))
 
 (use-package yasnippet-snippets
-  :after yasnippet
-  :config (yasnippet-snippets-initialize))
+  :after yasnippet)
+
 
 ;; Loren ipsum
 (use-package lorem-ipsum
